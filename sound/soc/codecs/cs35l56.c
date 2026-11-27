@@ -103,26 +103,6 @@ static void cs35l56_wait_dsp_ready(struct cs35l56_private *cs35l56)
 	flush_work(&cs35l56->dsp_work);
 }
 
-static int cs35l56_dspwait_get_volsw(struct snd_kcontrol *kcontrol,
-				     struct snd_ctl_elem_value *ucontrol)
-{
-	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
-	struct cs35l56_private *cs35l56 = snd_soc_component_get_drvdata(component);
-
-	cs35l56_wait_dsp_ready(cs35l56);
-	return snd_soc_get_volsw(kcontrol, ucontrol);
-}
-
-static int cs35l56_dspwait_put_volsw(struct snd_kcontrol *kcontrol,
-				     struct snd_ctl_elem_value *ucontrol)
-{
-	struct snd_soc_component *component = snd_kcontrol_chip(kcontrol);
-	struct cs35l56_private *cs35l56 = snd_soc_component_get_drvdata(component);
-
-	cs35l56_wait_dsp_ready(cs35l56);
-	return snd_soc_put_volsw(kcontrol, ucontrol);
-}
-
 static DECLARE_TLV_DB_SCALE(vol_tlv, -10000, 25, 0);
 
 static SOC_ENUM_SINGLE_DECL(cs35l56_cal_set_status_enum, SND_SOC_NOPM, 0,
@@ -138,44 +118,32 @@ static int cs35l56_cal_set_status_ctl_get(struct snd_kcontrol *kcontrol,
 }
 
 static const struct snd_kcontrol_new cs35l56_controls[] = {
-	SOC_SINGLE_EXT("Speaker Switch",
-		       CS35L56_MAIN_RENDER_USER_MUTE, 0, 1, 1,
-		       cs35l56_dspwait_get_volsw, cs35l56_dspwait_put_volsw),
-	SOC_SINGLE_S_EXT_TLV("Speaker Volume",
-			     CS35L56_MAIN_RENDER_USER_VOLUME,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_SHIFT,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_MIN,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_MAX,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_SIGNBIT,
-			     0,
-			     cs35l56_dspwait_get_volsw,
-			     cs35l56_dspwait_put_volsw,
-			     vol_tlv),
-	SOC_SINGLE_EXT("Posture Number", CS35L56_MAIN_POSTURE_NUMBER,
-		       0, 255, 0,
-		       cs35l56_dspwait_get_volsw, cs35l56_dspwait_put_volsw),
+	SOC_SINGLE("Speaker Switch", CS35L56_MAIN_RENDER_USER_MUTE, 0, 1, 1),
+	SOC_SINGLE_S_TLV("Speaker Volume",
+			 CS35L56_MAIN_RENDER_USER_VOLUME,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_SHIFT,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_MIN,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_MAX,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_SIGNBIT,
+			 0,
+			 vol_tlv),
+	SOC_SINGLE("Posture Number", CS35L56_MAIN_POSTURE_NUMBER, 0, 255, 0),
 	SOC_ENUM_EXT_ACC("CAL_SET_STATUS", cs35l56_cal_set_status_enum,
 			 cs35l56_cal_set_status_ctl_get, NULL,
 			 SNDRV_CTL_ELEM_ACCESS_READ | SNDRV_CTL_ELEM_ACCESS_VOLATILE),
 };
 
 static const struct snd_kcontrol_new cs35l63_controls[] = {
-	SOC_SINGLE_EXT("Speaker Switch",
-		       CS35L63_MAIN_RENDER_USER_MUTE, 0, 1, 1,
-		       cs35l56_dspwait_get_volsw, cs35l56_dspwait_put_volsw),
-	SOC_SINGLE_S_EXT_TLV("Speaker Volume",
-			     CS35L63_MAIN_RENDER_USER_VOLUME,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_SHIFT,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_MIN,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_MAX,
-			     CS35L56_MAIN_RENDER_USER_VOLUME_SIGNBIT,
-			     0,
-			     cs35l56_dspwait_get_volsw,
-			     cs35l56_dspwait_put_volsw,
-			     vol_tlv),
-	SOC_SINGLE_EXT("Posture Number", CS35L63_MAIN_POSTURE_NUMBER,
-		       0, 255, 0,
-		       cs35l56_dspwait_get_volsw, cs35l56_dspwait_put_volsw),
+	SOC_SINGLE("Speaker Switch", CS35L63_MAIN_RENDER_USER_MUTE, 0, 1, 1),
+	SOC_SINGLE_S_TLV("Speaker Volume",
+			 CS35L63_MAIN_RENDER_USER_VOLUME,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_SHIFT,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_MIN,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_MAX,
+			 CS35L56_MAIN_RENDER_USER_VOLUME_SIGNBIT,
+			 0,
+			 vol_tlv),
+	SOC_SINGLE("Posture Number", CS35L63_MAIN_POSTURE_NUMBER, 0, 255, 0),
 	SOC_ENUM_EXT_ACC("CAL_SET_STATUS", cs35l56_cal_set_status_enum,
 			 cs35l56_cal_set_status_ctl_get, NULL,
 			 SNDRV_CTL_ELEM_ACCESS_READ | SNDRV_CTL_ELEM_ACCESS_VOLATILE),
